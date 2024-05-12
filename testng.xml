@@ -1,0 +1,26 @@
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
+<suite name="AppiumTestSuite" verbose="1">
+    <listeners>
+        <listener class-name="listeners.TestListeners"/>
+    </listeners>
+    <test name="LoginTest">
+        <parameter name="username" value="standard_user"/>
+        <parameter name="password" value="secret_sauce"/>
+        <classes>
+            <class name="testing.LoginTestCase">
+                <methods>
+                    <include name="InValidLogin"/>
+                    <include name="ValidLogin"/>
+                    <include name="chooseProduct" /> <!-- Skip chooseProduct() method -->
+                    <include name="CheckOut"/>
+                    <include name="logOut"/><!-- Skip CheckOut() method -->
+                </methods>
+            </class>
+        </classes>
+    </test>
+</suite>
+
+
+
+
+
