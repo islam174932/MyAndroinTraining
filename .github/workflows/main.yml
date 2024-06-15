@@ -31,7 +31,13 @@ jobs:
         distribution: 'adopt'
         java-version: '11'
 
-    - name: Download Android SDK
+    - name: Set up Android SDK
+      uses: android-actions/setup-android@v2
+      with:
+        api-level: 30
+        build-tools: '30.0.3'
+
+    - name: Download and configure Android Emulator
       uses: reactivecircus/android-emulator-runner@v2
       with:
         api-level: 30
@@ -39,7 +45,18 @@ jobs:
         arch: x86_64
         profile: Pixel_5
         avd-name: test
-        emulator-options: "-no-window -no-snapshot"
+        emulator-options: -no-window -no-snapshot
+        cores: 2
+        force-avd-creation: true
+        emulator-boot-timeout: 600
+        disable-animations: true
+        disable-spellchecker: false
+        disable-linux-hw-accel: true
+        enable-hw-keyboard: false
+        channel: stable
+      env:
+        JAVA_HOME: /opt/hostedtoolcache/Java_Adopt_jdk/11.0.23-9/x64
+        JAVA_HOME_11_X64: /opt/hostedtoolcache/Java_Adopt_jdk/11.0.23-9/x64
 
     - name: Run Appium server
       run: |
@@ -51,7 +68,7 @@ jobs:
       with:
         node-version: '14'
 
-    - name: Install dependencies
+    - name: Install Appium CLI
       run: npm install -g appium
 
     - name: Install Maven
@@ -67,8 +84,8 @@ jobs:
     - name: Run tests
       run: mvn test
       env:
-        ANDROID_HOME: ${{ secrets.ANDROID_HOME }}
-        AVD_NAME: Pixel_5
+        ANDROID_HOME: ${{ env.ANDROID_HOME }}
+        AVD_NAME: test
         DEVICE: emulator-5554
 
     - name: Upload test results
@@ -76,4 +93,5 @@ jobs:
       with:
         name: test-results
         path: target/surefire-reports/
+
 
