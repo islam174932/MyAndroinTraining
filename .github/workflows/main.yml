@@ -36,8 +36,9 @@ jobs:
       with:
         api-level: 30
         build-tools: '30.0.3'
+        target: default
 
-    - name: Download and configure Android Emulator
+    - name: Create and start Android Emulator
       uses: reactivecircus/android-emulator-runner@v2
       with:
         api-level: 30
@@ -45,7 +46,7 @@ jobs:
         arch: x86_64
         profile: Pixel_5
         avd-name: test
-        emulator-options: -no-window -no-snapshot
+        emulator-options: '-no-window -no-snapshot'
         cores: 2
         force-avd-creation: true
         emulator-boot-timeout: 600
@@ -55,8 +56,16 @@ jobs:
         enable-hw-keyboard: false
         channel: stable
       env:
+        ANDROID_HOME: /usr/local/lib/android/sdk
+        ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
         JAVA_HOME: /opt/hostedtoolcache/Java_Adopt_jdk/11.0.23-9/x64
-        JAVA_HOME_11_X64: /opt/hostedtoolcache/Java_Adopt_jdk/11.0.23-9/x64
+
+    - name: Wait for Emulator to be ready
+      run: |
+        echo "Waiting for emulator to be ready..."
+        timeout 300s adb wait-for-device
+        adb shell getprop sys.boot_completed
+      continue-on-error: true
 
     - name: Run Appium server
       run: |
@@ -84,7 +93,7 @@ jobs:
     - name: Run tests
       run: mvn test
       env:
-        ANDROID_HOME: ${{ env.ANDROID_HOME }}
+        ANDROID_HOME: /usr/local/lib/android/sdk
         AVD_NAME: test
         DEVICE: emulator-5554
 
@@ -93,5 +102,6 @@ jobs:
       with:
         name: test-results
         path: target/surefire-reports/
+
 
 
