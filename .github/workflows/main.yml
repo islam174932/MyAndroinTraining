@@ -16,7 +16,7 @@ jobs:
       appium:
         image: appium/appium
         ports:
-          - 4724:4723
+          - 4724:4724
         options: >-
           --name appium
           --shm-size 2g
