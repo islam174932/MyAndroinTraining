@@ -1,0 +1,78 @@
+name: Android Appium Tests
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    services:
+      appium:
+        image: appium/appium
+        ports:
+          - 4724:4723
+        options: >-
+          --name appium
+          --shm-size 2g
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Set up JDK 17
+      uses: actions/setup-java@v3
+      with:
+        distribution: 'adopt'
+        java-version: '17'
+
+    - name: Download Android SDK
+      uses: reactivecircus/android-emulator-runner@v2
+      with:
+        api-level: 30
+        target: default
+        arch: x86_64
+        profile: Pixel_5
+        avd-name: test
+        emulator-options: "-no-window -no-snapshot"
+
+    - name: Run Appium server
+      run: |
+        docker run -d -p 4724:4723 appium/appium
+        sleep 15
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '14'
+
+    - name: Install dependencies
+      run: npm install -g appium
+
+    - name: Install Maven
+      uses: actions/setup-java@v3
+      with:
+        distribution: 'adopt'
+        java-version: '11'
+        cache: 'maven'
+
+    - name: Install Maven dependencies
+      run: mvn install
+
+    - name: Run tests
+      run: mvn test
+      env:
+        ANDROID_HOME: ${{ secrets.ANDROID_HOME }}
+        AVD_NAME: Pixel_5
+        DEVICE: emulator-5554
+
+    - name: Upload test results
+      uses: actions/upload-artifact@v3
+      with:
+        name: test-results
+        path: target/surefire-reports/
