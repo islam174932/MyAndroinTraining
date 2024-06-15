@@ -1,4 +1,4 @@
-name: Android Appium Testss
+name: Android Appium Tests
 
 on:
   push:
@@ -16,7 +16,7 @@ jobs:
       appium:
         image: appium/appium
         ports:
-          - 4724:4725
+          - 4724:4723
         options: >-
           --name appium
           --shm-size 2g
@@ -62,13 +62,12 @@ jobs:
         enable-hw-keyboard: false
         channel: stable
       env:
-        JAVA_HOME: /opt/hostedtoolcache/Java_Adopt_jdk/11.0.23-9/x64
-        JAVA_HOME_11_X64: /opt/hostedtoolcache/Java_Adopt_jdk/11.0.23-9/x64
-        ANDROID_HOME: /usr/local/lib/android/sdk
-        ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
+        JAVA_HOME: ${{ env.JAVA_HOME }}
+        ANDROID_HOME: ${{ env.ANDROID_HOME }}
 
     - name: Wait for emulator to start
-      run: adb wait-for-device shell getprop init.svc.bootanim | grep stopped
+      run: |
+        adb wait-for-device shell 'while [[ -z $(getprop sys.boot_completed) ]]; do sleep 1; done; input keyevent 82'
 
     - name: Run Appium server
       run: |
